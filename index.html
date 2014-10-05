@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <style>
-    /* CSS goes here */
+    .subunit.SCT { fill: #ddc; }
+    .subunit.WLS { fill: #cdd; }
+    .subunit.NIR { fill: #cdc; }
+    .subunit.ENG { fill: #dcd; }
+    .subunit.IRL { display: none; }
     
     </style>
     <title>Let's make a map!</title>
@@ -33,8 +37,11 @@ d3.json("geodata/uk.json", function(err, uk){
         var path = d3.geo.path()
             .projection(projection);
 
-        svg.append("path")
-            .datum(subunits)
+        svg.selectAll("subunit")
+            .data(subunits.features)
+            .enter()
+            .append("path")
+            .attr("class", function(d) { return "subunit " + d.id; })
             .attr("d", path);
 });
 </script>
