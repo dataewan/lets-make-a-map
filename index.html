@@ -8,6 +8,17 @@
     .subunit.NIR { fill: #cdc; }
     .subunit.ENG { fill: #dcd; }
     .subunit.IRL { display: none; }
+
+    .subunit-boundary {
+        fill: none;
+        stroke: #777;
+        stroke-dasharray: 2,2;
+        stroke-linejoin: round;
+    }
+
+    .subunit-boundary.IRL{
+        stroke: #aaa;
+    }
     
     </style>
     <title>Let's make a map!</title>
@@ -43,6 +54,16 @@ d3.json("geodata/uk.json", function(err, uk){
             .append("path")
             .attr("class", function(d) { return "subunit " + d.id; })
             .attr("d", path);
+
+        svg.append("path")
+            .datum(topojson.mesh(uk, uk.objects.subunits, function(a,b) {return a !== b && a.id !== "IRL" ; } ))
+            .attr("d", path)
+            .attr("class", "subunit-boundary");
+
+        svg.append("path")
+            .datum(topojson.mesh(uk, uk.objects.subunits, function(a,b) {return a === b && a.id === "IRL" ;}))
+            .attr("d", path)
+            .attr("class", "subunit-boundary IRL");
 });
 </script>
 </body>
