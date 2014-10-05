@@ -46,17 +46,21 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 <script>
+
+// set these things up while the data is loading
 var width = 960,
     height = 1160;
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
+
 d3.json("geodata/uk.json", function(err, uk){
         if (err) return console.error(err);
 
         var subunits = topojson.feature(uk, uk.objects.subunits);
 
+        // setup the projection
         var projection = d3.geo.albers()
             .center([0, 55.4])
             .rotate([4.4, 0])
@@ -64,10 +68,12 @@ d3.json("geodata/uk.json", function(err, uk){
             .scale(6000)
             .translate([width / 2, height / 2]);
 
+        // path creator
         var path = d3.geo.path()
             .projection(projection)
             .pointRadius(2);
 
+        // the different countries in the UK and Ireland
         svg.selectAll("subunit")
             .data(subunits.features)
             .enter()
@@ -75,21 +81,25 @@ d3.json("geodata/uk.json", function(err, uk){
             .attr("class", function(d) { return "subunit " + d.id; })
             .attr("d", path);
 
+        // internal boundaries between the countries
         svg.append("path")
             .datum(topojson.mesh(uk, uk.objects.subunits, function(a,b) {return a !== b && a.id !== "IRL" ; } ))
             .attr("d", path)
             .attr("class", "subunit-boundary");
 
+        // external boundary for ireland
         svg.append("path")
             .datum(topojson.mesh(uk, uk.objects.subunits, function(a,b) {return a === b && a.id === "IRL" ;}))
             .attr("d", path)
             .attr("class", "subunit-boundary IRL");
 
+        // place points
         svg.append("path")
             .datum(topojson.feature(uk, uk.objects.places))
             .attr("d", path)
             .attr("class", "place");
 
+        // place labels
         svg.selectAll(".place-label")
             .data(topojson.feature(uk, uk.objects.places).features)
             .enter().append("text")
@@ -98,10 +108,12 @@ d3.json("geodata/uk.json", function(err, uk){
             .attr("dy", "0.35em")
             .text(function (d) { return d.properties.name; });
 
+        // put place labels on one side or the other, depending on if they are to the west or east of 1degW
         svg.selectAll(".place-label")
             .attr("x", function(d) { return d.geometry.coordinates[0] > -1 ? 6 : -6; })
             .style("text-anchor", function(d) { return d.geometry.coordinates[0] > -1 ? "start" : "end" ; });
 
+        // labels for the countries
         svg.selectAll(".subunit-label")
             .data(topojson.feature(uk, uk.objects.subunits).features)
             .enter().append("text")
